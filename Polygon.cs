@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Timer = System.Windows.Forms.Timer;
+using System.Threading; // Не забудьте добавить эту директиву
+
 
 namespace CG_LAB2
 {
@@ -109,6 +111,7 @@ namespace CG_LAB2
                             g.FillRectangle(new SolidBrush(color), x, y, 1, 1); // Рисуем пиксель
                         }
                     }
+                    Thread.Sleep(1);
                 }
             }
         }
