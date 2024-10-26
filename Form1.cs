@@ -1,4 +1,5 @@
-﻿using System;
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -54,7 +55,7 @@ namespace CG_LAB2
                         int y = int.Parse(parts[1]);
                         int z = int.Parse(parts[2]);
 
-                        vertices.Add(new Point3D(x+cenX, y+cenY, -z)); // Добавляем вершину с учетом центра
+                        vertices.Add(new Point3D(x + cenX, y + cenY, -z)); // Добавляем вершину с учетом центра
                     }
                 }
 
@@ -143,7 +144,7 @@ namespace CG_LAB2
         private void algorithmButton_Click(object sender, EventArgs e)
         {
             RenderAlgorithm(); // Генерация случайных многоугольников
-           
+
         }
 
         // Метод для отрисовки всех многоугольников
@@ -182,10 +183,7 @@ namespace CG_LAB2
         {
             using (Graphics g = this.CreateGraphics())
             {
-                Pen pen = new Pen(Color.Black);
                 g.Clear(this.BackColor); // Очищаем холст, устанавливая его цвет
-                g.DrawLine(pen, cenX, cenY, cenX, 0);
-                g.DrawLine(pen, cenX, cenY, cenX*2, cenY);
             }
         }
 
