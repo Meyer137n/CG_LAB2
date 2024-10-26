@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Timer = System.Windows.Forms.Timer;
 using System.Threading; // Не забудьте добавить эту директиву
 
 
@@ -20,6 +19,16 @@ namespace CG_LAB2
             this.color = color; // Инициализируем цвет
         }
 
+        public List<Point3D> getPoints()
+        {
+            return points;
+        }
+
+        public Color getColor()
+        {
+            return color;
+        }
+
         // Метод для отрисовки каркасного многоугольника
         public void Carcas(Graphics g)
         {
@@ -36,7 +45,7 @@ namespace CG_LAB2
                     Point3D p2 = points[(i + 1) % points.Count]; // Следующая вершина (с циклическим доступом)
 
                     // Рисуем отрезок между двумя вершинами
-                    g.DrawLine(pen, p1.X, p1.Y, p2.X, p2.Y);
+                    g.DrawLine(pen, p1.getX(), p1.getY(), p2.getX(), p2.getY());
                 }
             }
         }
@@ -51,8 +60,8 @@ namespace CG_LAB2
             float minY = float.MaxValue, maxY = float.MinValue;
             foreach (var point in points)
             {
-                if (point.Y < minY) minY = point.Y; // Обновляем минимальную Y координату
-                if (point.Y > maxY) maxY = point.Y; // Обновляем максимальную Y координату
+                if (point.getY() < minY) minY = point.getY(); // Обновляем минимальную Y координату
+                if (point.getY() > maxY) maxY = point.getY(); // Обновляем максимальную Y координату
             }
 
             // Для каждой строки выполняем построчный скан
@@ -70,18 +79,17 @@ namespace CG_LAB2
                     Point3D p2 = points[(i + 1) % points.Count]; // Следующая вершина
 
                     // Проверяем, пересекает ли отрезок текущую линию сканирования
-                    if ((p1.Y <= y && p2.Y > y) || (p2.Y <= y && p1.Y > y))
+                    if ((p1.getY() <= y && p2.getY() > y) || (p2.getY() <= y && p1.getY() > y))
                     {
                         // Находим X координату пересечения и интерполируем Z
-                        float intersectX = p1.X + (y - p1.Y) * (p2.X - p1.X) / (p2.Y - p1.Y);
-                        float intersectZ = p1.Z + (y - p1.Y) * (p2.Z - p1.Z) / (p2.Y - p1.Y);
+                        float intersectX = p1.getX() + (y - p1.getY()) * (p2.getX() - p1.getX()) / (p2.getY() - p1.getY());
+                        float intersectZ = p1.getZ() + (y - p1.getY()) * (p2.getZ() - p1.getZ()) / (p2.getY() - p1.getY());
                         intersections.Add(new Tuple<int, float>(Convert.ToInt32(intersectX), intersectZ)); // Добавляем пересечение в список
                     }
                 }
 
                 // Сортируем пересечения по X
                 intersections.Sort((a, b) => a.Item1.CompareTo(b.Item1));
-
                 // Обработка видимых частей многоугольника
                 for (int i = 0; i < intersections.Count - 1; i += 2)
                 {
@@ -104,7 +112,7 @@ namespace CG_LAB2
                         {
                             if (zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)] != float.MaxValue)
                             {
-                                Console.WriteLine("[{0}][{1}]={2}", x, y, zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)]);
+                                Console.WriteLine(" [ X = {0} ][ Y = {1} ][ Z = {2} ]", x, y, zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)]);
                             }
                             // Обновляем Z-буфер и рисуем пиксель с нужным цветом
                             zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)] = z;

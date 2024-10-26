@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
 namespace CG_LAB2
 {
@@ -17,8 +18,8 @@ namespace CG_LAB2
 
         public Form1()
         {
-            cenX = Size.Width; // Устанавливаем центр по X на ширину формы
-            cenY = Size.Height; // Устанавливаем центр по Y на высоту формы
+            cenX = 3 * Size.Width; // Устанавливаем центр по X на ширину формы
+            cenY = 2 * Size.Height; // Устанавливаем центр по Y на высоту формы
             InitializeComponent(); // Инициализация компонентов формы
             screenWidth = this.ClientSize.Width; // Получаем ширину клиентской области
             screenHeight = this.ClientSize.Height; // Получаем высоту клиентской области
@@ -53,7 +54,7 @@ namespace CG_LAB2
                         int y = int.Parse(parts[1]);
                         int z = int.Parse(parts[2]);
 
-                        vertices.Add(new Point3D(x + cenX, y + cenY, z)); // Добавляем вершину с учетом центра
+                        vertices.Add(new Point3D(x+cenX, y+cenY, -z)); // Добавляем вершину с учетом центра
                     }
                 }
 
@@ -86,7 +87,7 @@ namespace CG_LAB2
                 int numVertices = random.Next(3, 7); // Генерируем от 3 до 6 вершин для каждого многоугольника
                 List<Point3D> vertices = new List<Point3D>(); // Список вершин многоугольника
 
-                float z = random.Next(-20, 20); // Генерация случайной z-координаты
+                float z = random.Next(-40, 40); // Генерация случайной z-координаты
 
                 // Генерация вершин многоугольника
                 for (int j = 0; j < numVertices; j++)
@@ -97,8 +98,8 @@ namespace CG_LAB2
 
                     vertices.Add(new Point3D(x + cenX, y + cenY, z)); // Добавляем вершину с учетом центра
                 }
-                shiftX += random.Next(-50, 100); // Случайное смещение по X
-                shiftY += random.Next(-50, 100); // Случайное смещение по Y
+                shiftX += random.Next(-100, 100); // Случайное смещение по X
+                shiftY += random.Next(-100, 100); // Случайное смещение по Y
 
                 // Генерация случайного цвета для многоугольника
                 Color color = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
@@ -156,6 +157,7 @@ namespace CG_LAB2
                 foreach (var polygon in polygons)
                 {
                     polygon.Carcas(g);
+                    DrawColorSquares();
                 }
             }
         }
@@ -166,7 +168,7 @@ namespace CG_LAB2
             using (Graphics g = this.CreateGraphics())
             {
                 ResetZBuffer(); // Сброс Z-буфера перед отрисовкой
-
+                Console.WriteLine("\n\n Новая обработка");
                 // Отрисовка каждого многоугольника
                 foreach (var polygon in polygons)
                 {
@@ -180,9 +182,37 @@ namespace CG_LAB2
         {
             using (Graphics g = this.CreateGraphics())
             {
+                Pen pen = new Pen(Color.Black);
                 g.Clear(this.BackColor); // Очищаем холст, устанавливая его цвет
+                g.DrawLine(pen, cenX, cenY, cenX, 0);
+                g.DrawLine(pen, cenX, cenY, cenX*2, cenY);
             }
         }
 
+        // Метод для отрисовки маленьких квадратов и подписей вершин многоугольников
+        private void DrawColorSquares()
+        {
+            using (Graphics g = this.CreateGraphics())
+            {
+                int squareSize = 20; // Размер квадрата 
+                int offsetX = 30; // Смещение по X для подписей
+                int offsetY = 150; // Смещение по Y для подписей
+                int spacing = 20; // Отступ между квадратами
+
+                for (int i = 0; i < polygons.Count; i++)
+                {
+                    // Рисуем квадрат с цветом многоугольника
+                    g.FillRectangle(new SolidBrush(polygons[i].getColor()), offsetX, offsetY + (i * (squareSize + spacing)), squareSize, squareSize);
+                    List<Point3D> points = polygons[i].getPoints(); // Список точек текущего многоугольника
+
+                    for (int k = 0; k < points.Count; k++)
+                    {
+                        // Подписываем квадрат (например, номер вершины)
+                        g.DrawString($"Polygon {i + 1}    Z = {-points[k].getZ()}", this.Font, Brushes.Black, offsetX + squareSize + 2, offsetY + (i * (squareSize + spacing)));
+                        offsetY += 20;
+                    }
+                }
+            }
+        }
     }
 }
