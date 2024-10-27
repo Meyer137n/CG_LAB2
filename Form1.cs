@@ -1,4 +1,4 @@
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -16,15 +16,33 @@ namespace CG_LAB2
         private Random random = new Random(); // Генератор случайных чисел
         private int cenX; // Центр по X
         private int cenY; // Центр по Y
+        string filePath;
 
         public Form1()
         {
-            cenX = 3 * Size.Width; // Устанавливаем центр по X на ширину формы
-            cenY = 2 * Size.Height; // Устанавливаем центр по Y на высоту формы
+            cenX = 3 * ClientSize.Width; // Устанавливаем центр по X на ширину формы
+            cenY = 2 * ClientSize.Height; // Устанавливаем центр по Y на высоту формы
             InitializeComponent(); // Инициализация компонентов формы
             screenWidth = this.ClientSize.Width; // Получаем ширину клиентской области
             screenHeight = this.ClientSize.Height; // Получаем высоту клиентской области
             zBuffer = new float[screenWidth, screenHeight]; // Инициализация Z-буфера
+        }
+
+        // Метод для выбора файла и возврата его пути
+        private string SelectFile(string filter = "Все файлы (*.*)|*.*")
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = filter; // Устанавливаем фильтр для типов файлов
+                openFileDialog.Title = "Выберите файл"; // Заголовок диалогового окна
+
+                // Открываем диалог выбора файла и проверяем, был ли выбран файл
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    return openFileDialog.FileName; // Возвращаем полный путь к выбранному файлу
+                }
+            }
+            return null; // Если файл не был выбран, возвращаем null
         }
 
         // Метод для чтения многоугольников из файла
@@ -55,7 +73,7 @@ namespace CG_LAB2
                         int y = int.Parse(parts[1]);
                         int z = int.Parse(parts[2]);
 
-                        vertices.Add(new Point3D(x + cenX, y + cenY, -z)); // Добавляем вершину с учетом центра
+                        vertices.Add(new Point3D(x + cenX, y + cenY, z)); // Добавляем вершину с учетом центра
                     }
                 }
 
@@ -88,7 +106,7 @@ namespace CG_LAB2
                 int numVertices = random.Next(3, 7); // Генерируем от 3 до 6 вершин для каждого многоугольника
                 List<Point3D> vertices = new List<Point3D>(); // Список вершин многоугольника
 
-                float z = random.Next(-40, 40); // Генерация случайной z-координаты
+                float z = random.Next(0, 60); // Генерация случайной z-координаты
 
                 // Генерация вершин многоугольника
                 for (int j = 0; j < numVertices; j++)
@@ -133,18 +151,35 @@ namespace CG_LAB2
         }
 
         // Обработчик события нажатия кнопки для загрузки многоугольников
-        private void loadButton_Click(object sender, EventArgs e)
+        private void openButton_Click(object sender, EventArgs e)
         {
             ClearDrawingArea(); // Очищаем область рисования перед новой отрисовкой
-            LoadPolygonsFromFile("V://polygons.txt"); // Считываем многоугольники из файла
-            DrawPolygons();
+            filePath = SelectFile("Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*"); // Открываем диалог выбора файла
+
+            // Проверяем, был ли файл выбран
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                MessageBox.Show($"Выбранный файл: {filePath}"); // Выводим путь к выбранному файлу
+            }
+            else
+            {
+                MessageBox.Show("Файл не был выбран."); // Сообщение, если файл не выбран
+            }           
+        }
+
+        // Обработчик события нажатия кнопки
+        private void loadButton_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine(filePath);
+            ClearDrawingArea(); // Очищаем область рисования перед новой отрисовкой
+            LoadPolygonsFromFile(filePath); // Считываем многоугольники из файла
+            DrawPolygons(); // Обновляем форму, вызывая перерисовку
         }
 
         // Обработчик события нажатия кнопки для запуска алгоритма
         private void algorithmButton_Click(object sender, EventArgs e)
         {
             RenderAlgorithm(); // Генерация случайных многоугольников
-
         }
 
         // Метод для отрисовки всех многоугольников
@@ -206,7 +241,7 @@ namespace CG_LAB2
                     for (int k = 0; k < points.Count; k++)
                     {
                         // Подписываем квадрат (например, номер вершины)
-                        g.DrawString($"Polygon {i + 1}    Z = {-points[k].getZ()}", this.Font, Brushes.Black, offsetX + squareSize + 2, offsetY + (i * (squareSize + spacing)));
+                        g.DrawString($"Polygon {i + 1}    Z = {points[k].getZ()}", this.Font, Brushes.Black, offsetX + squareSize + 2, offsetY + (i * (squareSize + spacing)));
                         offsetY += 20;
                     }
                 }
