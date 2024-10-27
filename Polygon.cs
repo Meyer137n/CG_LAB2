@@ -110,13 +110,13 @@ namespace CG_LAB2
                         // Проверяем Z-буфер
                         if (z < zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)])
                         {
-                            if (zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)] != float.MaxValue)
-                            {
-                                Console.WriteLine(" [ X = {0} ][ Y = {1} ][ Z = {2} ]", x, y, zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)]);
-                            }
                             // Обновляем Z-буфер и рисуем пиксель с нужным цветом
                             zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)] = z;
                             g.FillRectangle(new SolidBrush(color), x, y, 1, 1); // Рисуем пиксель
+                            if (zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)] != float.MaxValue)
+                            {
+                                Console.WriteLine("[ X = {0} ][ Y = {1} ][ Глубина = {2} ]", x-screenWidth/2, y-screenHeight/2, zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)]);
+                            }
                         }
                     }
                     Thread.Sleep(1);

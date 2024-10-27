@@ -14,14 +14,10 @@ namespace CG_LAB2
         private float[,] zBuffer; // Z-буфер для хранения глубины
         private int screenWidth, screenHeight; // Ширина и высота экрана
         private Random random = new Random(); // Генератор случайных чисел
-        private int cenX; // Центр по X
-        private int cenY; // Центр по Y
         string filePath;
 
         public Form1()
         {
-            cenX = 3 * ClientSize.Width; // Устанавливаем центр по X на ширину формы
-            cenY = 2 * ClientSize.Height; // Устанавливаем центр по Y на высоту формы
             InitializeComponent(); // Инициализация компонентов формы
             screenWidth = this.ClientSize.Width; // Получаем ширину клиентской области
             screenHeight = this.ClientSize.Height; // Получаем высоту клиентской области
@@ -73,7 +69,7 @@ namespace CG_LAB2
                         int y = int.Parse(parts[1]);
                         int z = int.Parse(parts[2]);
 
-                        vertices.Add(new Point3D(x + cenX, y + cenY, z)); // Добавляем вершину с учетом центра
+                        vertices.Add(new Point3D(x + screenWidth/2, y + screenHeight/2, z)); // Добавляем вершину с учетом центра
                     }
                 }
 
@@ -115,7 +111,7 @@ namespace CG_LAB2
                     x = (int)(50 * Math.Cos(angle)) + shiftX;  // x-координата со смещением
                     y = (int)(50 * Math.Sin(angle)) + shiftY;  // y-координата
 
-                    vertices.Add(new Point3D(x + cenX, y + cenY, z)); // Добавляем вершину с учетом центра
+                    vertices.Add(new Point3D(x + screenWidth/2, y + screenHeight/2, z)); // Добавляем вершину с учетом центра
                 }
                 shiftX += random.Next(-100, 100); // Случайное смещение по X
                 shiftY += random.Next(-100, 100); // Случайное смещение по Y
@@ -241,7 +237,7 @@ namespace CG_LAB2
                     for (int k = 0; k < points.Count; k++)
                     {
                         // Подписываем квадрат (например, номер вершины)
-                        g.DrawString($"Polygon {i + 1}    Z = {points[k].getZ()}", this.Font, Brushes.Black, offsetX + squareSize + 2, offsetY + (i * (squareSize + spacing)));
+                        g.DrawString($"Многоугольник {i + 1}    Z = {points[k].getZ()}", this.Font, Brushes.Black, offsetX + squareSize + 2, offsetY + (i * (squareSize + spacing)));
                         offsetY += 20;
                     }
                 }
