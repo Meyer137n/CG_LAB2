@@ -88,9 +88,10 @@ namespace CG_LAB2
                     }
                 }
 
-                // Сортируем пересечения по X
+                // Сортируем пересечения по X для создания интервалов
                 intersections.Sort((a, b) => a.Item1.CompareTo(b.Item1));
-                // Обработка видимых частей многоугольника
+
+                // Обработка видимых интервалов многоугольника
                 for (int i = 0; i < intersections.Count - 1; i += 2)
                 {
                     int xStart = intersections[i].Item1; // Начальная X координата
@@ -98,30 +99,37 @@ namespace CG_LAB2
                     int xEnd = intersections[i + 1].Item1; // Конечная X координата
                     float zEnd = intersections[i + 1].Item2; // Z координата для конечного X
 
-                    // Линейная интерполяция Z между началом и концом
+                    // Пропускаем интервал, если он полностью вне границ экрана
+                    if (xEnd < 0 || xStart >= screenWidth) continue;
+
+                    // Ограничиваем интервал границами экрана
+                    xStart = Math.Max(0, xStart);
+                    xEnd = Math.Min(screenWidth - 1, xEnd);
+
+                    // Линейная интерполяция Z в пределах интервала
+                    float zStep = (zEnd - zStart) / (xEnd - xStart);
+
+                    float currentZ = zStart;
                     for (int x = xStart; x <= xEnd; x++)
                     {
-                        // Пропускаем, если X координата вне экранных границ
-                        if (x < 0 || x >= screenWidth) continue;
-
-                        // Вычисляем Z для текущего X с использованием интерполяции
-                        float z = zStart + (x - xStart) * (zEnd - zStart) / (xEnd - xStart);
-
-                        // Проверяем Z-буфер
-                        if (z < zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)])
+                        // Проверяем Z-буфер для начального и конечного значений
+                        if (currentZ < zBuffer[x, (int)y])
                         {
-                            // Обновляем Z-буфер и рисуем пиксель с нужным цветом
-                            zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)] = z;
-                            g.FillRectangle(new SolidBrush(color), x, y, 1, 1); // Рисуем пиксель
+                            // Обновляем Z-буфер и рисуем интервал с нужным цветом
+                            zBuffer[x, (int)y] = currentZ;
+                            g.FillRectangle(new SolidBrush(color), x, (int)y, 1, 1); // Рисуем пиксель
                             if (zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)] != float.MaxValue)
                             {
-                                Console.WriteLine("[ X = {0} ][ Y = {1} ][ Глубина = {2} ]", x-screenWidth/2, y-screenHeight/2, zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)]);
+                                Console.WriteLine("[ X = {0} ][ Y = {1} ][ Глубина = {2} ]", x - screenWidth / 2, y - screenHeight / 2, zBuffer[Convert.ToInt32(x), Convert.ToInt32(y)]);
                             }
                         }
+
+                        currentZ += zStep;
                     }
-                    Thread.Sleep(1);
                 }
+                Thread.Sleep(1);
             }
+        
         }
     }
 }

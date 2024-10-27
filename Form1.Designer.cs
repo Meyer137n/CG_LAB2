@@ -52,7 +52,7 @@
             // 
             // Form1
             // 
-            this.ClientSize = new System.Drawing.Size(1800, 1100);
+            this.ClientSize = new System.Drawing.Size(1500, 1100);
             this.Controls.Add(this.drawButton); // Добавляем кнопку на форму
             this.Controls.Add(this.loadButton); // Добавляем кнопку на форму
             this.Controls.Add(this.algorithmButton); // Добавляем кнопку на форму
