@@ -1,247 +1,825 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 
-namespace CG_LAB2
+namespace Modeling1
 {
-    public partial class Form1 : Form
+    public partial class Form1 : System.Windows.Forms.Form
     {
-        private List<Polygon> polygons = new List<Polygon>(); // Список многоугольников для отрисовки
-        private float[,] zBuffer; // Z-буфер для хранения глубины
-        private int screenWidth, screenHeight; // Ширина и высота экрана
-        private Random random = new Random(); // Генератор случайных чисел
-        string filePath;
-
+        private Graphics g;
+        private int[,] task1;
+        private int[,] task2;
         public Form1()
         {
-            InitializeComponent(); // Инициализация компонентов формы
-            screenWidth = this.ClientSize.Width; // Получаем ширину клиентской области
-            screenHeight = this.ClientSize.Height; // Получаем высоту клиентской области
-            zBuffer = new float[screenWidth, screenHeight]; // Инициализация Z-буфера
+            InitializeComponent();
+            g = CreateGraphics();
+            DisplayPartColors(); 
+            labelI.Visible = false;
+            label1.Visible = false;
+            label2.Visible = false;
+            label3.Visible = false;
+            label4.Visible = false;
+            label5.Visible = false;
+            labelA.Visible = false;
+            labelA1.Visible = false;
+            labelA2.Visible = false;
+            labelA3.Visible = false;
+            labelA4.Visible = false;
+            labelA5.Visible = false;
+            labelB.Visible = false;
+            labelB1.Visible = false;
+            labelB2.Visible = false;
+            labelB3.Visible = false;
+            labelB4.Visible = false;
+            labelB5.Visible = false;
+            labelC.Visible = false;
+            labelC1.Visible = false;
+            labelC2.Visible = false;
+            labelC3.Visible = false;
+            labelC4.Visible = false;
+            labelC5.Visible = false;
+            buttonRun11.Visible = false;
+            buttonRun12.Visible = false;
+            buttonRun21.Visible = false;
+            buttonRun22.Visible = false;
+            this.BackColor = Color.White;
         }
 
-        // Метод для выбора файла и возврата его пути
-        private string SelectFile(string filter = "Все файлы (*.*)|*.*")
-        {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                openFileDialog.Filter = filter; // Устанавливаем фильтр для типов файлов
-                openFileDialog.Title = "Выберите файл"; // Заголовок диалогового окна
+        private void Form_Load(object sender, EventArgs e) => WindowState = FormWindowState.Maximized;
 
-                // Открываем диалог выбора файла и проверяем, был ли выбран файл
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    return openFileDialog.FileName; // Возвращаем полный путь к выбранному файлу
-                }
+        #region firts task
+
+        /**
+         * Метод для отображения информации
+         * о соответствии номера детали и цвета на графике
+         */
+        private void DisplayPartColors()
+        {
+            // Создаем панель для размещения цветных квадратиков
+            Panel colorPanel = new Panel();
+            colorPanel.Location = new Point(200, 15);
+            colorPanel.Size = new Size(200, 150);
+            colorPanel.AutoScroll = true;
+
+            // Создаем массив цветов для деталей
+            Color[] colors = { Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Blue };
+
+            // Создаем метки и цветные квадратики
+            for (int i = 0; i < 5; i++)
+            {
+                Label partLabel = new Label();
+                partLabel.Text = $"Деталь {i + 1}";
+                partLabel.Font = new Font("Arial", 12);
+                partLabel.AutoSize = true;
+                partLabel.Location = new Point(10, i * 30);
+
+                Panel colorSquare = new Panel();
+                colorSquare.Size = new Size(20, 20);
+                colorSquare.BackColor = colors[i];
+                colorSquare.Location = new Point(partLabel.Width + 20, partLabel.Top);
+
+                colorPanel.Controls.Add(partLabel);
+                colorPanel.Controls.Add(colorSquare);
             }
-            return null; // Если файл не был выбран, возвращаем null
+
+            // Добавляем панель на форму
+            this.Controls.Add(colorPanel);
         }
 
-        // Метод для чтения многоугольников из файла
-        private void LoadPolygonsFromFile(string filePath)
+        /**
+         * Работа с заданием №1
+         */
+        private void buttonTask1_Click(object sender, EventArgs e)
         {
-            polygons.Clear(); // Очищаем список многоугольников
-            try
+            buttonRun21.Visible = false;
+            buttonRun22.Visible = false;
+            g.Clear(Color.White);
+
+            task1 = new int[5, 2];
+            string filePath = "V:\\task1.txt"; 
+            MatrixLoader.LoadArrayFromFile(filePath, task1);
+            LoadDataIntoLabels(task1, true);
+
+            labelDowntime.Location = new Point(13, 142);
+            buttonRun11.Visible = true;
+            buttonRun12.Visible = true;
+            FindAmountOfDowntimeNx2();
+            DrawGanttNx2();
+        }
+
+        /**
+         * Метод обрабатывающий событие
+         * нажатия кнопки buttonRun11
+         */
+        private void buttonSort11_Click(object sender, EventArgs e)
+        {
+            task1 = new int[5, 2];
+            string filePath = "V:\\task1.txt";
+            MatrixLoader.LoadArrayFromFile(filePath, task1);
+
+            task1 = JohnsonNx2();
+            LoadDataIntoLabels(task1, true);
+            FindAmountOfDowntimeNx2();
+            g.Clear(Color.White);
+            DrawGanttNx2();
+        }
+
+        /**
+         * Метод обрабатывающий событие
+         * нажатия кнопки buttonRun12
+         */
+        private void buttonSort12_Click(object sender, EventArgs e)
+        {
+            task1 = new int[5, 2];
+            string filePath = "V:\\task1.txt";
+            MatrixLoader.LoadArrayFromFile(filePath, task1);
+
+            task1 = Swaper.GetBestPermutation(task1);
+            LoadDataIntoLabels(task1, true);
+            g.Clear(Color.White);
+            FindAmountOfDowntimeNx2();
+            DrawGanttNx2();
+        }
+
+        /**
+         * Алгоритм Джонсона для матрицы Nx2
+         */
+        private int[,] JohnsonNx2()
+        {
+            int[,] matrix = new int[task1.GetLength(0), task1.GetLength(1)];
+            int linesCount = task1.GetLength(0);
+            int clolumsCount = task1.GetLength(1);
+            int top = 0;
+            int button = 4;
+            while (linesCount > 0)
             {
-                string[] lines = File.ReadAllLines(filePath); // Читаем все строки из файла
-                List<Point3D> vertices = new List<Point3D>(); // Список для хранения вершин многоугольника
-                foreach (string line in lines)
+                int minElement = task1[0, 0];
+                int colum = 0;
+                int row = 0;
+                // Поиск минимального элемента
+                for (int i = 0; i < linesCount; i++)
                 {
-                    if (string.IsNullOrWhiteSpace(line)) // Проверяем, является ли строка пустой
+                    for (int j = 0; j < clolumsCount; j++)
                     {
-                        if (vertices.Count > 0)
+                        if (task1[i, j] < minElement)
                         {
-                            // Генерация случайного цвета для многоугольника
-                            Color color = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
-                            polygons.Add(new Polygon(vertices, color)); // Добавляем многоугольник в список
-                            vertices = new List<Point3D>(); // Очищаем для следующего многоугольника
+                            minElement = task1[i, j];
+                            row = i;
+                            colum = j;
                         }
                     }
+                }
+                // Если в первом столбце, то записываю наверх
+                if (colum == 0)
+                {
+                    matrix[top, 0] = task1[row, 0];
+                    matrix[top, 1] = task1[row, 1];
+                    top++;
+                }
+                // Во втором - записываю вниз
+                else
+                {
+                    matrix[button, 0] = task1[row, 0];
+                    matrix[button, 1] = task1[row, 1];
+                    button--;
+                }
+                // Удаляю строку из первоначального массива
+                for (int i = row; i < linesCount - 1; i++)
+                    for (int j = 0; j < clolumsCount; j++)
+                        task1[i, j] = task1[i + 1, j];
+                linesCount--;
+            }
+            return matrix;
+        }
+
+        /**
+         * Поиск времени окончания обработки для Nx2
+         */
+        private void FindAmountOfDowntimeNx2()
+        {
+            int[] x = new int[task1.GetLength(0)];
+
+            for (int i = 0; i < task1.GetLength(0); i++)
+            {
+                int sumTask1 = 0;
+                for (int n = 0; n <= i; n++)
+                {
+                    sumTask1 += task1[n, 0];
+                }
+
+                int sumDowntime = 0;
+                int sumTask1Duration = 0;
+                for (int m = 0; m < i; m++)
+                {
+                    sumDowntime += x[m];
+                    sumTask1Duration += task1[m, 1];
+                }
+
+                x[i] = Math.Max(0, sumTask1 - sumDowntime - sumTask1Duration);
+            }
+
+            // Вычисляем общее время окончания обработки
+            int totalTime = 0;
+            for (int i = 0; i < task1.GetLength(0); i++)
+            {
+                totalTime += x[i];
+                totalTime += task1[i, 1];
+            }
+
+            labelDowntime.Location = new Point(13, 142);
+            labelDowntime.Text = "Время окончания обработки: " + totalTime;
+        }
+
+        /**
+         * Отрисовка графиков Ганта для двух станков
+         */
+        private void DrawGanttNx2()
+        {
+            SolidBrush sb1 = new SolidBrush(Color.Red);
+            SolidBrush sb2 = new SolidBrush(Color.Orange);
+            SolidBrush sb3 = new SolidBrush(Color.Yellow);
+            SolidBrush sb4 = new SolidBrush(Color.Green);
+            SolidBrush sb5 = new SolidBrush(Color.Blue);
+            SolidBrush sbDowntime = new SolidBrush(Color.LightGray);
+
+            int x = 10; 
+            int y = 200;
+            int squareSize = 10; 
+            int spacing = 2; 
+
+            // Отрисовка графиков Ганта и названий станков
+            for (int i = 0; i < task1.GetLength(0); i++)
+            {
+                int width = task1[i, 0]; // Ширина в единицах
+                int numSquares = width; // Количество квадратиков
+
+                // Рисуем квадратики в зависимости от индекса
+                for (int j = 0; j < numSquares; j++)
+                {
+                    Rectangle square = new Rectangle(x + j * (squareSize + spacing), y, squareSize, squareSize);
+                    if (i == 0)
+                        g.FillRectangle(sb1, square);
+                    else if (i == 1)
+                        g.FillRectangle(sb2, square);
+                    else if (i == 2)
+                        g.FillRectangle(sb3, square);
+                    else if (i == 3)
+                        g.FillRectangle(sb4, square);
                     else
-                    {
-                        // Парсим строку в координаты x, y, z
-                        string[] parts = line.Split(' ');
-                        int x = int.Parse(parts[0]);
-                        int y = int.Parse(parts[1]);
-                        int z = int.Parse(parts[2]);
-
-                        vertices.Add(new Point3D(x + screenWidth/2, y + screenHeight/2, z)); // Добавляем вершину с учетом центра
-                    }
+                        g.FillRectangle(sb5, square);
                 }
 
-                // Добавляем последний многоугольник, если он не был добавлен
-                if (vertices.Count > 0)
+                // Перемещаем позицию вправо с учетом ширины и расстояния между квадратиками
+                x += (numSquares * (squareSize + spacing));
+            }
+
+            g.DrawString("Станок A", this.Font, Brushes.Black, new Point(10, y - 20));
+            g.DrawString("Станок B", this.Font, Brushes.Black, new Point(10, y + 30));
+
+            // Отрисовка простоев
+            y += 50; 
+            x = 10; 
+            int[] downtime = new int[task1.GetLength(0)];
+
+            for (int i = 0; i < task1.GetLength(0); i++)
+            {
+                int sumTask1 = 0;
+                for (int n = 0; n <= i; n++)
                 {
-                    Color color = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
-                    polygons.Add(new Polygon(vertices, color)); // Добавляем последний многоугольник
+                    sumTask1 += task1[n, 0];
                 }
 
-                ResetZBuffer(); // Сбрасываем Z-буфер
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при чтении файла: {ex.Message}"); // Сообщаем об ошибке при чтении
-            }
-        }
-
-        // Метод для генерации 5-6 случайных многоугольников с 3-6 вершинами
-        private void GenerateRandomPolygons()
-        {
-            polygons.Clear(); // Очищаем список многоугольников
-            float shiftX = 0; // Смещение по X
-            float shiftY = 0; // Смещение по Y
-            float x, y;
-
-            int numPolygons = random.Next(5, 7); // Генерируем от 5 до 6 многоугольников
-            for (int i = 0; i < numPolygons; i++)
-            {
-                int numVertices = random.Next(3, 7); // Генерируем от 3 до 6 вершин для каждого многоугольника
-                List<Point3D> vertices = new List<Point3D>(); // Список вершин многоугольника
-
-                float z = random.Next(0, 60); // Генерация случайной z-координаты
-
-                // Генерация вершин многоугольника
-                for (int j = 0; j < numVertices; j++)
+                int sumDowntime = 0;
+                int sumTask1Duration = 0;
+                for (int m = 0; m < i; m++)
                 {
-                    double angle = 2 * Math.PI * j / numVertices; // Вычисление угла
-                    x = (int)(50 * Math.Cos(angle)) + shiftX;  // x-координата со смещением
-                    y = (int)(50 * Math.Sin(angle)) + shiftY;  // y-координата
-
-                    vertices.Add(new Point3D(x + screenWidth/2, y + screenHeight/2, z)); // Добавляем вершину с учетом центра
+                    sumDowntime += downtime[m];
+                    sumTask1Duration += task1[m, 1];
                 }
-                shiftX += random.Next(-100, 100); // Случайное смещение по X
-                shiftY += random.Next(-100, 100); // Случайное смещение по Y
 
-                // Генерация случайного цвета для многоугольника
-                Color color = Color.FromArgb(random.Next(256), random.Next(256), random.Next(256));
-
-                // Добавляем сгенерированный многоугольник в список
-                polygons.Add(new Polygon(vertices, color));
-            }
-
-            ResetZBuffer(); // Сбрасываем Z-буфер
-        }
-
-        // Метод для инициализации Z-буфера
-        private void ResetZBuffer()
-        {
-            for (int x = 0; x < screenWidth; x++)
-            {
-                for (int y = 0; y < screenHeight; y++)
+                downtime[i] = Math.Max(0, sumTask1 - sumDowntime - sumTask1Duration);
+                int numDowntimeSquares = downtime[i]; // Количество квадратиков для простоев
+                for (int j = 0; j < numDowntimeSquares; j++)
                 {
-                    zBuffer[x, y] = float.MaxValue; // Устанавливаем "бесконечную" глубину
+                    Rectangle square = new Rectangle(x + j * (squareSize + spacing), y, squareSize, squareSize);
+                    g.FillRectangle(sbDowntime, square);
                 }
+                x += (numDowntimeSquares * (squareSize + spacing)); // Обновляем x с учетом простоев
+
+                int duration = task1[i, 1];
+                int numDurationSquares = duration; // Количество квадратиков для длительности
+                for (int j = 0; j < numDurationSquares; j++)
+                {
+                    Rectangle square = new Rectangle(x + j * (squareSize + spacing), y, squareSize, squareSize);
+                    if (i == 0)
+                        g.FillRectangle(sb1, square);
+                    else if (i == 1)
+                        g.FillRectangle(sb2, square);
+                    else if (i == 2)
+                        g.FillRectangle(sb3, square);
+                    else if (i == 3)
+                        g.FillRectangle(sb4, square);
+                    else
+                        g.FillRectangle(sb5, square);
+                }
+                x += (numDurationSquares * (squareSize + spacing)); // Обновляем x с учетом длительности
             }
         }
 
-        // Обработчик события нажатия кнопки для рисования
-        private void drawButton_Click(object sender, EventArgs e)
+        #endregion
+
+        /**
+         * Работа с заданием №2
+         */
+        private void buttonTask2_Click(object sender, EventArgs e)
         {
-            ClearDrawingArea(); // Очищаем область рисования перед новой отрисовкой
-            GenerateRandomPolygons(); // Генерация случайных многоугольников
-            DrawPolygons();
+            g.Clear(Color.White);
+            buttonRun11.Visible = false;
+            buttonRun12.Visible = false;
+
+            task2 = new int[5, 3];
+            string filePath = "V:\\task2.txt";
+            MatrixLoader.LoadArrayFromFile(filePath, task2);
+            LoadDataIntoLabels(task2, false);
+
+            labelDowntime.Location = new Point(13, 142);
+            buttonRun21.Visible = true;
+            buttonRun22.Visible = true;
+            findAmountOfDowntime3xn();
+            DrawGanttNx3();
         }
 
-        // Обработчик события нажатия кнопки для загрузки многоугольников
-        private void openButton_Click(object sender, EventArgs e)
+        // По алгоритму
+        private void buttonRun21_Click(object sender, EventArgs e)
         {
-            ClearDrawingArea(); // Очищаем область рисования перед новой отрисовкой
-            filePath = SelectFile("Текстовые файлы (*.txt)|*.txt|Все файлы (*.*)|*.*"); // Открываем диалог выбора файла
+            task2 = new int[5, 3];
+            string filePath = "V:\\task2.txt";
+            MatrixLoader.LoadArrayFromFile(filePath, task2);
 
-            // Проверяем, был ли файл выбран
-            if (!string.IsNullOrEmpty(filePath))
+            if (CheckData())
             {
-                MessageBox.Show($"Выбранный файл: {filePath}"); // Выводим путь к выбранному файлу
+                convertToNx2(task2);
+                int[,] task1Copy = (int[,])task1.Clone(); 
+                task1 = JohnsonNx2(); 
+                int[] newOrder = FindRowOrder(task1, task1Copy);
+                RearrangeTask2(task2, newOrder);
+                LoadDataIntoLabels(task2, false);
+                g.Clear(Color.White);
+                findAmountOfDowntime3xn();
+                DrawGanttNx3();
+
             }
             else
             {
-                MessageBox.Show("Файл не был выбран."); // Сообщение, если файл не выбран
-            }           
-        }
-
-        // Обработчик события нажатия кнопки
-        private void loadButton_Click(object sender, EventArgs e)
-        {
-            Console.WriteLine(filePath);
-            ClearDrawingArea(); // Очищаем область рисования перед новой отрисовкой
-            LoadPolygonsFromFile(filePath); // Считываем многоугольники из файла
-            DrawPolygons(); // Обновляем форму, вызывая перерисовку
-        }
-
-        // Обработчик события нажатия кнопки для запуска алгоритма
-        private void algorithmButton_Click(object sender, EventArgs e)
-        {
-            RenderAlgorithm(); // Генерация случайных многоугольников
-        }
-
-        // Метод для отрисовки всех многоугольников
-        private void DrawPolygons()
-        {
-            using (Graphics g = this.CreateGraphics())
-            {
-                ResetZBuffer(); // Сброс Z-буфера перед отрисовкой
-
-                // Рисуем каркас каждого многоугольника
-                foreach (var polygon in polygons)
-                {
-                    polygon.Carcas(g);
-                    DrawColorSquares();
-                }
+                MessageBox.Show("Условие не выполняется, результат был найден перебором", "Информация",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                task2 = Swaper.GetBestPermutationNx3(task2);
+                LoadDataIntoLabels(task2, false);
+                g.Clear(Color.White);
+                findAmountOfDowntime3xn();
+                DrawGanttNx3();
             }
+
         }
 
-        // Метод, вызываемый для отрисовки видимых граней
-        public void RenderAlgorithm()
+        /**
+         * Находит разницу в порядке строк двух массивов
+         */
+        private int[] FindRowOrder(int[,] task1, int[,] task1Copy)
         {
-            using (Graphics g = this.CreateGraphics())
+            int rows = task1.GetLength(0);
+            int[] order = new int[rows];
+            bool[] matched = new bool[rows];
+
+            for (int i = 0; i < rows; i++)
             {
-                ResetZBuffer(); // Сброс Z-буфера перед отрисовкой
-                Console.WriteLine("\n\n Новая обработка");
-                // Отрисовка каждого многоугольника
-                foreach (var polygon in polygons)
+                for (int j = 0; j < rows; j++)
                 {
-                    polygon.Draw(g, zBuffer, screenWidth, screenHeight);
-                }
-            }
-        }
-
-        // Метод для очистки области рисования
-        private void ClearDrawingArea()
-        {
-            using (Graphics g = this.CreateGraphics())
-            {
-                g.Clear(this.BackColor); // Очищаем холст, устанавливая его цвет
-            }
-        }
-
-        // Метод для отрисовки маленьких квадратов и подписей вершин многоугольников
-        private void DrawColorSquares()
-        {
-            using (Graphics g = this.CreateGraphics())
-            {
-                int squareSize = 20; // Размер квадрата 
-                int offsetX = 30; // Смещение по X для подписей
-                int offsetY = 150; // Смещение по Y для подписей
-                int spacing = 20; // Отступ между квадратами
-
-                for (int i = 0; i < polygons.Count; i++)
-                {
-                    // Рисуем квадрат с цветом многоугольника
-                    g.FillRectangle(new SolidBrush(polygons[i].getColor()), offsetX, offsetY + (i * (squareSize + spacing)), squareSize, squareSize);
-                    List<Point3D> points = polygons[i].getPoints(); // Список точек текущего многоугольника
-
-                    for (int k = 0; k < points.Count; k++)
+                    // Сравниваем строки
+                    if (!matched[j] && task1[i, 0] == task1Copy[j, 0] && task1[i, 1] == task1Copy[j, 1])
                     {
-                        // Подписываем квадрат (например, номер вершины)
-                        g.DrawString($"Многоугольник {i + 1}    Z = {points[k].getZ()}", this.Font, Brushes.Black, offsetX + squareSize + 2, offsetY + (i * (squareSize + spacing)));
-                        offsetY += 20;
+                        order[i] = j; // Запоминаем индекс оригинального массива
+                        matched[j] = true; // Помечаем строку как найденную
+                        break;
                     }
                 }
             }
+            return order;
+        }
+
+        /**
+         * Меняет порядок строк в массиве по заданному условию
+         */
+        private void RearrangeTask2(int[,] task2, int[] newOrder)
+        {
+            int[,] rearrangedTask2 = new int[task2.GetLength(0), task2.GetLength(1)];
+
+            for (int i = 0; i < newOrder.Length; i++)
+            {
+                rearrangedTask2[i, 0] = task2[newOrder[i], 0];
+                rearrangedTask2[i, 1] = task2[newOrder[i], 1];
+                rearrangedTask2[i, 2] = task2[newOrder[i], 2];
+            }
+            Array.Copy(rearrangedTask2, task2, rearrangedTask2.Length);
+        }
+
+
+        // Перебором
+        private void buttonRun22_Click(object sender, EventArgs e)
+        {
+            task2 = new int[5, 3];
+            string filePath = "V:\\task2.txt";
+            MatrixLoader.LoadArrayFromFile(filePath, task2);
+
+            task2 = Swaper.GetBestPermutationNx3(task2);
+            LoadDataIntoLabels(task2, false);
+            g.Clear(Color.White);
+            findAmountOfDowntime3xn();
+            DrawGanttNx3();
+        }
+
+        /**
+         * Метод для проверки условия,
+         * возможно ли преобразование матрицы от вида Nx3 к виду Nx2
+         */
+        private bool CheckData()
+        {
+            bool flag = false;
+            int minA = task2[0, 0];
+            int maxB = 0;
+            int minC = task2[0, 2];
+            for (int i = 0; i < task2.GetLength(0); i++)
+            {
+                if (minA > task2[i, 0])
+                    minA = task2[i, 0];
+                if (maxB < task2[i, 1])
+                    maxB = task2[i, 1];
+                if (minC > task2[i, 2])
+                    minC = task2[i, 2];
+            }
+            if (minA >= maxB || minC >= maxB)
+                flag = true;
+            return flag;
+        }
+
+        /**
+         * Метод сводит задачу с тремя станками
+         * к задаче с двуммя станками
+         */
+        private void convertToNx2(int[,] inputTask)
+        {
+            task1 = new int[inputTask.GetLength(0), 2];
+            for (int i = 0; i < task1.GetLength(0); i++)
+            {
+                task1[i, 0] = inputTask[i, 0] + inputTask[i, 1];
+                task1[i, 1] = inputTask[i, 2] + inputTask[i, 1];
+            }
+        }
+
+        /**
+         * Алгоритм Джонсона для матрицы Nx3
+         */
+        private void sort3xn()
+        {
+            int[,] matrix = new int[task1.GetLength(0), task1.GetLength(1)];
+            int[,] data = new int[task2.GetLength(0), task2.GetLength(1)];
+            int linesCount = task1.GetLength(0);
+            int top = 0;
+            int button = 4;
+            while (linesCount > 0)
+            {
+                int minElement = task1[0, 0];
+                int colum = 0;
+                int row = 0;
+                // Поиск минимального элемента
+                for (int i = 0; i < linesCount; i++)
+                    for (int j = 0; j < task1.GetLength(1); j++)
+                        if (task1[i, j] < minElement)
+                        {
+                            minElement = task1[i, j];
+                            colum = j;
+                            row = i;
+                        }
+                // Сортировка
+                if (colum == 0)
+                {
+                    matrix[top, 0] = task1[row, 0];
+                    matrix[top, 1] = task1[row, 1];
+                    data[top, 0] = task2[row, 0];
+                    data[top, 1] = task2[row, 1];
+                    data[top, 2] = task2[row, 2];
+                    top++;
+                }
+                else
+                {
+                    matrix[button, 0] = task1[row, 0];
+                    matrix[button, 1] = task1[row, 1];
+                    data[button, 0] = task2[row, 0];
+                    data[button, 1] = task2[row, 1];
+                    data[button, 2] = task2[row, 2];
+                    button--;
+                }
+                // Удаление строки
+                for (int i = row; i < task1.GetLength(0) - 1; i++)
+                    for (int j = 0; j < task1.GetLength(1); j++)
+                        task1[i, j] = task1[i + 1, j];
+                for (int i = row; i < task2.GetLength(0) - 1; i++)
+                    for (int j = 0; j < task2.GetLength(1); j++)
+                        task2[i, j] = task2[i + 1, j];
+                linesCount--;
+            }
+            task1 = matrix;
+            task2 = data;
+        }
+
+        /**
+         * Метод находит сумму простроев в расписании
+         */
+        private void findAmountOfDowntime3xn()
+        {
+            int[] downtime = new int[task2.GetLength(0)]; // Массив для простоев В
+            int[] downtimeforc = new int[task2.GetLength(0)]; // Массив для простоев С
+
+            // Вычисляем простои
+            for (int i = 0; i < task2.GetLength(0); i++)
+            {
+                int sumTask2 = 0;
+                for (int n = 0; n <= i; n++)
+                {
+                    sumTask2 += task2[n, 0]; // Суммируем значения ai
+                }
+
+                int sumDowntime = 0;
+                for (int m = 0; m < i; m++)
+                {
+                    sumDowntime += downtime[m]; // Суммируем предыдущие простои
+                }
+
+                int sumTask2Duration = 0;
+                for (int m = 0; m < i; m++)
+                {
+                    sumTask2Duration += task2[m, 1]; // Суммируем длительности bi
+                }
+
+                // Вычисляем downtime для текущего задания
+                downtime[i] = Math.Max(0, sumTask2 - sumDowntime - sumTask2Duration);
+            }
+
+            // Вычисляем простои для станка C
+            for (int i = 0; i < task2.GetLength(0); i++)
+            {
+                // Суммируем downtime от 0 до i
+                int sumDowntimeForc = 0;
+                for (int m = 0; m <= i; m++)
+                {
+                    sumDowntimeForc += downtime[m];
+                }
+
+                // Суммируем task2 от 0 до i
+                int sumTask1 = 0;
+                for (int n = 0; n <= i; n++)
+                {
+                    sumTask1 += task2[n, 1]; // Сумма bi
+                }
+
+                // Суммируем downtimeforc от 0 до i-1
+                int sumDowntimeForc2 = 0;
+                for (int n = 0; n < i; n++)
+                {
+                    sumDowntimeForc2 += downtimeforc[n];
+                }
+
+                // Суммируем task2 от 0 до i-1
+                int sumTask2Duration = 0;
+                for (int n = 0; n < i; n++)
+                {
+                    sumTask2Duration += task2[n, 2];
+                }
+
+                // Вычисляем downtimeforc[i]
+                downtimeforc[i] = Math.Max(0, sumDowntimeForc + sumTask1 - sumDowntimeForc2 - sumTask2Duration);
+            }
+
+            int totalTime = 0;
+            for (int i = 0; i < task2.GetLength(0); i++)
+            {
+                totalTime += downtimeforc[i];
+                totalTime += task2[i, 2];
+            }
+
+            labelDowntime.Text = "Время окончания обработки: " + totalTime;
+        }
+
+        /**
+         * Отрисовка графиков Ганта для трех станков
+         */
+        private void DrawGanttNx3()
+        {
+            SolidBrush sb1 = new SolidBrush(Color.Red);
+            SolidBrush sb2 = new SolidBrush(Color.Orange);
+            SolidBrush sb3 = new SolidBrush(Color.Yellow);
+            SolidBrush sb4 = new SolidBrush(Color.Green);
+            SolidBrush sb5 = new SolidBrush(Color.Blue);
+            SolidBrush sbDowntime = new SolidBrush(Color.LightGray);
+
+            int x = 10; 
+            int y = 200;
+            int squareSize = 10;
+            int spacing = 2; 
+
+            for (int i = 0; i < task2.GetLength(0); i++)
+            {
+                int width = task2[i, 0]; // Ширина в единицах
+                int numSquares = width; // Количество квадратиков
+
+                // Рисуем квадратики в зависимости от индекса
+                for (int j = 0; j < numSquares; j++)
+                {
+                    Rectangle square = new Rectangle(x + j * (squareSize + spacing), y, squareSize, squareSize);
+                    if (i == 0)
+                        g.FillRectangle(sb1, square);
+                    else if (i == 1)
+                        g.FillRectangle(sb2, square);
+                    else if (i == 2)
+                        g.FillRectangle(sb3, square);
+                    else if (i == 3)
+                        g.FillRectangle(sb4, square);
+                    else
+                        g.FillRectangle(sb5, square);
+                }
+
+                // Перемещаем позицию вправо с учетом ширины и расстояния между квадратиками
+                x += (numSquares * (squareSize + spacing));
+            }
+
+            g.DrawString("Станок A", this.Font, Brushes.Black, new PointF(10, y - 20));
+            g.DrawString("Станок B", this.Font, Brushes.Black, new PointF(10, y + 30));
+            g.DrawString("Станок C", this.Font, Brushes.Black, new PointF(10, y + 80));
+
+            y += 50; 
+            x = 10; 
+            int[] downtime = new int[task2.GetLength(0)];
+
+            for (int i = 0; i < task2.GetLength(0); i++)
+            {
+                int sumTask1 = 0;
+                for (int n = 0; n <= i; n++)
+                {
+                    sumTask1 += task2[n, 0];
+                }
+
+                int sumDowntime = 0;
+                int sumTask1Duration = 0;
+                for (int m = 0; m < i; m++)
+                {
+                    sumDowntime += downtime[m];
+                    sumTask1Duration += task2[m, 1];
+                }
+
+                downtime[i] = Math.Max(0, sumTask1 - sumDowntime - sumTask1Duration);
+                int numDowntimeSquares = downtime[i]; // Количество квадратиков для простоев
+                for (int j = 0; j < numDowntimeSquares; j++)
+                {
+                    Rectangle square = new Rectangle(x + j * (squareSize + spacing), y, squareSize, squareSize);
+                    g.FillRectangle(sbDowntime, square);
+                }
+                x += (numDowntimeSquares * (squareSize + spacing)); // Обновляем x с учетом простоев
+
+                int duration = task2[i, 1];
+                int numDurationSquares = duration; // Количество квадратиков для длительности
+                for (int j = 0; j < numDurationSquares; j++)
+                {
+                    Rectangle square = new Rectangle(x + j * (squareSize + spacing), y, squareSize, squareSize);
+                    if (i == 0)
+                        g.FillRectangle(sb1, square);
+                    else if (i == 1)
+                        g.FillRectangle(sb2, square);
+                    else if (i == 2)
+                        g.FillRectangle(sb3, square);
+                    else if (i == 3)
+                        g.FillRectangle(sb4, square);
+                    else
+                        g.FillRectangle(sb5, square);
+                }
+                x += (numDurationSquares * (squareSize + spacing)); // Обновляем x с учетом длительности
+            }
+
+            y += 50; 
+            x = 10; 
+
+            int[] downtimeforc = new int[task2.GetLength(0)]; // Массив для простоев
+                                                              // Рисуем простои
+            for (int i = 0; i < task2.GetLength(0); i++)
+            {
+                int sumDowntime = 0;
+                for (int m = 0; m <= i; m++)
+                {
+                    sumDowntime += downtime[m];
+                }
+
+                int sumTask1 = 0;
+                for (int n = 0; n <= i; n++)
+                {
+                    sumTask1 += task2[n, 1]; // сумма bi
+                }
+
+                int sumDowntimeForc = 0;
+                for (int n = 0; n < i; n++)
+                {
+                    sumDowntimeForc += downtimeforc[n];
+                }
+
+                int sumTask2Duration = 0;
+                for (int n = 0; n < i; n++)
+                {
+                    sumTask2Duration += task2[n, 2];
+                }
+
+                // Вычисляем downtimeforc[i]
+                downtimeforc[i] = Math.Max(0, sumDowntime + sumTask1 - sumDowntimeForc - sumTask2Duration);
+                int numDowntimeSquares = downtimeforc[i]; // Количество квадратиков для простоев
+                for (int j = 0; j < numDowntimeSquares; j++)
+                {
+                    Rectangle square = new Rectangle(x + j * (squareSize + spacing), y, squareSize, squareSize);
+                    g.FillRectangle(sbDowntime, square);
+                }
+                x += (numDowntimeSquares * (squareSize + spacing)); // Обновляем x с учетом простоев
+
+                int duration = task2[i, 2];
+                int numDurationSquares = duration; // Количество квадратиков для длительности
+                for (int j = 0; j < numDurationSquares; j++)
+                {
+                    Rectangle square = new Rectangle(x + j * (squareSize + spacing), y, squareSize, squareSize);
+                    if (i == 0)
+                        g.FillRectangle(sb1, square);
+                    else if (i == 1)
+                        g.FillRectangle(sb2, square);
+                    else if (i == 2)
+                        g.FillRectangle(sb3, square);
+                    else if (i == 3)
+                        g.FillRectangle(sb4, square);
+                    else
+                        g.FillRectangle(sb5, square);
+                }
+                x += (numDurationSquares * (squareSize + spacing)); // Обновляем x с учетом длительности
+            }
+        }
+
+        private void LoadDataIntoLabels(int[,] taskData, bool isTask1)
+        {
+            ShowILabels();
+
+            // Установим видимость для Label A
+            labelA.Visible = true;
+            for (int i = 0; i < 5; i++)
+            {
+                Controls[$"labelA{i + 1}"].Visible = true;
+                Controls[$"labelA{i + 1}"].Text = taskData[i, 0].ToString();
+            }
+
+            // Установим видимость для Label B
+            labelB.Visible = true;
+            for (int i = 0; i < 5; i++)
+            {
+                Controls[$"labelB{i + 1}"].Visible = true;
+                Controls[$"labelB{i + 1}"].Text = taskData[i, 1].ToString();
+            }
+
+            // Установим видимость для Label C, если это task2
+            if (!isTask1)
+            {
+                labelC.Visible = true;
+                for (int i = 0; i < 5; i++)
+                {
+                    Controls[$"labelC{i + 1}"].Visible = true;
+                    Controls[$"labelC{i + 1}"].Text = taskData[i, 2].ToString();
+                }
+            }
+            else
+            {
+                // Скрыть Label C для task1
+                labelC.Visible = false;
+                for (int i = 0; i < 5; i++)
+                {
+                    Controls[$"labelC{i + 1}"].Visible = false;
+                }
+            }
+        }
+
+        private void ShowILabels()
+        {
+            labelI.Visible = true;
+            label1.Visible = true;
+            label2.Visible = true;
+            label3.Visible = true;
+            label4.Visible = true;
+            label5.Visible = true;
         }
     }
 }
